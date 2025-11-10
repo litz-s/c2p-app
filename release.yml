@@ -1,0 +1,38 @@
+
+name: build-and-release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-win:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Temurin JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Gradle build & jpackage
+        run: ./gradlew --no-daemon clean jpackage portableZip sha256sum
+
+      - name: Collect artifacts
+        run: |
+          mkdir dist
+          if (Test-Path build/jpackage/*.msi) { Copy-Item build/jpackage/*.msi dist/ }
+          if (Test-Path build/dist/*.zip) { Copy-Item build/dist/*.zip dist/ }
+          if (Test-Path build/dist/SHA256SUMS.txt) { Copy-Item build/dist/SHA256SUMS.txt dist/ }
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.msi
+            dist/*.zip
+            dist/SHA256SUMS.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

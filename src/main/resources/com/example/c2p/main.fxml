@@ -10,7 +10,6 @@
         <HBox spacing="8" BorderPane.alignment="CENTER_RIGHT" style="-fx-padding: 10;">
             <Label text="C2P Tables" style="-fx-font-size: 18; -fx-font-weight: bold;" />
             <Pane HBox.hgrow="ALWAYS" />
-            <!-- ここが必須 -->
             <Button fx:id="addBtn" text="＋">
                 <tooltip>
                     <Tooltip text="新しいコピペテーブルを作成" />

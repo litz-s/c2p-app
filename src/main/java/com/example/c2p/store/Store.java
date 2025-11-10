@@ -1,18 +1,19 @@
 package com.example.c2p.store;
 
-import com.example.c2p.util.ConfigPaths;
-import com.example.c2p.model.CopyTable; // ← プロジェクトの実型に合わせて import 調整
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
-
-// 先頭の import 群に追記
 import java.util.concurrent.CompletableFuture;
+
+import com.example.c2p.model.CopyTable;
+import com.example.c2p.util.ConfigPaths;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class Store {
     private final Path jsonPath;
@@ -23,17 +24,14 @@ public class Store {
         this.jsonPath = jsonPath;
     }
 
-    /** 既定の保存先で作るヘルパー。 */
     public static Store createDefault() {
         return new Store(ConfigPaths.defaultStorePath());
     }
 
-    /** 読み込み。無ければ作成、壊れていれば .bak へ退避して初期化。 */
     public void load() {
         try {
             Files.createDirectories(jsonPath.getParent());
             if (!Files.exists(jsonPath)) {
-                // 初回：空の配列で新規作成
                 save();
                 return;
             }
@@ -43,7 +41,6 @@ public class Store {
             tables.clear();
             tables.addAll(loaded);
         } catch (IOException e) {
-            // 壊れている等：バックアップして初期化
             try {
                 Files.createDirectories(jsonPath.getParent());
                 if (Files.exists(jsonPath)) {
@@ -58,20 +55,15 @@ public class Store {
         }
     }
 
-    // クラス内のどこでも良い（public メソッド群のあたり）に追記
-
     /** 非同期保存（UIスレッドをブロックしない） */
     public void saveAsync() {
-        // 失敗時は RuntimeException を投げて終わらせるだけの簡易版
         CompletableFuture.runAsync(this::save);
     }
 
-    /** IDでテーブルを1件検索。見つからなければ null を返す */
     public CopyTable findTableById(String id) {
         if (id == null)
             return null;
         for (CopyTable t : tables) {
-            // プロジェクト側のID型/ゲッタ名に合わせてここだけ必要なら調整
             if (id.equals(t.getId())) {
                 return t;
             }
@@ -79,7 +71,7 @@ public class Store {
         return null;
     }
 
-    /** 保存。 */
+    /** 保存 */
     public void save() {
         try {
             Files.createDirectories(jsonPath.getParent());
@@ -96,7 +88,6 @@ public class Store {
         }
     }
 
-    // アクセサ
     public List<CopyTable> getTables() {
         return tables;
     }
