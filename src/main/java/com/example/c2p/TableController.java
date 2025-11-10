@@ -1,15 +1,30 @@
 package com.example.c2p;
 
+import java.time.Instant;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
+
 import com.example.c2p.model.CopyTable;
 import com.example.c2p.model.SnippetItem;
 import com.example.c2p.store.Store;
-import javafx.application.Platform;
+
+import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
+import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.geometry.Insets;
+import javafx.geometry.Point2D;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.KeyCode;
@@ -17,47 +32,32 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.text.Text;
 import javafx.scene.layout.Region;
-import javafx.beans.value.ChangeListener;
-
-// 追加 import
+import javafx.scene.text.Text;
 import javafx.stage.Popup;
-import javafx.geometry.Point2D;
-import javafx.animation.FadeTransition;
-
-import java.time.Instant;
-import java.util.Objects;
 import javafx.util.Duration;
-import java.util.UUID;
-
-import javafx.collections.transformation.FilteredList;
-import java.util.Locale;
 
 public class TableController {
 
     @FXML
     private BorderPane root;
 
-    // Show the "Copied" popup near the given TextArea
     private void showCopiedPopupNear(TextArea ta) {
         if (copiedPopup.isShowing()) {
             copiedPopup.hide();
         }
-        // Calculate position relative to the TextArea
         Point2D nodeCoord = ta.localToScene(0, 0);
         double x = ta.getScene().getWindow().getX() + nodeCoord.getX() + ta.getScene().getX();
-        double y = ta.getScene().getWindow().getY() + nodeCoord.getY() + ta.getScene().getY() - 32; // show above
+        double y = ta.getScene().getWindow().getY() + nodeCoord.getY() + ta.getScene().getY() - 32; 
 
         copiedPopup.show(ta.getScene().getWindow(), x, y);
 
-        // Fade out after 1 second
         FadeTransition ft = new FadeTransition(Duration.millis(800), copiedPopup.getContent().get(0));
         ft.setFromValue(1.0);
         ft.setToValue(0.0);
         ft.setOnFinished(e -> {
             copiedPopup.hide();
-            copiedPopup.getContent().get(0).setOpacity(1.0); // reset for next time
+            copiedPopup.getContent().get(0).setOpacity(1.0); 
         });
         ft.play();
     }
@@ -91,7 +91,6 @@ public class TableController {
                 searchField.selectAll();
                 ev.consume();
             } else if (ev.getCode() == KeyCode.F3) {
-                // 次の一致へ（簡易版：今より下の最初の一致を探す）
                 String q = (searchField.getText() == null) ? "" : searchField.getText().toLowerCase(Locale.ROOT);
                 if (!q.isEmpty()) {
                     int start = Math.max(0, listView.getSelectionModel().getSelectedIndex());
@@ -125,10 +124,10 @@ public class TableController {
 
             {
                 // TextArea 基本設定
-                ta.setWrapText(true); // 折り返しON（内部スクロールしにくくする）
+                ta.setWrapText(true); 
                 ta.setEditable(false);
                 ta.setPrefRowCount(1);
-                ta.setMinHeight(Region.USE_PREF_SIZE); // Pref を下回らない
+                ta.setMinHeight(Region.USE_PREF_SIZE);
                 ta.setMaxHeight(Double.MAX_VALUE);
 
                 // 高さ自動更新関数
@@ -148,7 +147,7 @@ public class TableController {
                     }
                 });
 
-                // クリック判定：シングル/ダブルを厳密に分離
+                // クリック判定
                 ta.setOnMouseClicked(ev -> {
                     if (ev.getClickCount() == 2) {
                         // ダブルクリック：シングル処理をキャンセルして編集へ
@@ -164,9 +163,7 @@ public class TableController {
                                 cc.putString(text);
                                 Clipboard.getSystemClipboard().setContent(cc);
 
-                                // ---- ここからポップ表示 ----
                                 showCopiedPopupNear(ta);
-                                // ---- ここまで ----
                             }
                         });
                         singleClickDelay.playFromStart();
@@ -182,7 +179,6 @@ public class TableController {
                             it.setText(ta.getText());
                             it.setUpdatedAt(Instant.now().toString());
                             App.getStore().saveAsync();
-                            // 編集により改行数が変わったら高さも更新
                             updateTextAreaRows();
                         }
                     }
@@ -206,7 +202,6 @@ public class TableController {
                 root.setPadding(new Insets(4));
                 HBox.setHgrow(ta, Priority.ALWAYS);
 
-                // ホバー時だけ削除ボタンを見せる（好みで常時表示でもOK）
                 root.hoverProperty().addListener((o, was, is) -> deleteBtn.setVisible(is));
                 deleteBtn.setVisible(false);
             }
@@ -223,7 +218,7 @@ public class TableController {
                 if (txt == null || txt.isEmpty())
                     txt = " "; // 空でも最低1行分確保
 
-                double wrap = Math.max(0, ta.getWidth() - 16); // 適度に余白分を差し引く（必要に応じて調整）
+                double wrap = Math.max(0, ta.getWidth() - 16); 
                 Text meas = new Text(txt);
                 meas.setFont(ta.getFont());
                 meas.setWrappingWidth(wrap);
@@ -244,7 +239,7 @@ public class TableController {
                     setGraphic(null);
                 } else {
                     ta.setText(Objects.toString(item.getText(), ""));
-                    updateAutoHeight(); // 表示時にも高さ同期
+                    updateAutoHeight(); 
                     setGraphic(root);
                 }
             }
@@ -263,7 +258,7 @@ public class TableController {
 
         listView.setItems(filtered);
 
-        // 検索テキストに応じて絞り込み（大小無視・部分一致）
+        // 検索テキストに応じて絞り込み
         searchField.textProperty().addListener((obs, ov, nv) -> {
             final String q = nv == null ? "" : nv.trim().toLowerCase(Locale.ROOT);
             if (q.isEmpty()) {

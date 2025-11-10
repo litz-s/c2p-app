@@ -1,7 +1,6 @@
 package com.example.c2p;
 
 import java.io.IOException;
-import java.nio.file.Path;
 
 import com.example.c2p.store.Store;
 
@@ -59,7 +58,6 @@ public class App extends Application {
         }
     }
 
-    // App クラス内に追加（既存コードはそのまま）
     private static void applyAppIcons(javafx.stage.Window w) {
         if (!(w instanceof javafx.stage.Stage))
             return;

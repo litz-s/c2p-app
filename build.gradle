@@ -7,7 +7,7 @@ plugins {
 }
 
 group = 'com.example'
-version = '1.0.0'
+version = '1.1.0'
 
 repositories {
     mavenCentral()
@@ -26,7 +26,6 @@ application {
 }
 
 javafx {
-    // Use a JavaFX matching the JDK (21系)
     version = '21.0.4'
     modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
@@ -43,11 +42,6 @@ test {
     useJUnitPlatform()
 }
 
-/**
- * org.beryx.jlink: Create a minimized runtime + Windows installer via jpackage
- *  - No code signing (無料運用)
- *  - Fill metadata properly to look like a legit app
- */
 jlink {
     options = ['--strip-debug', '--no-header-files', '--no-man-pages', '--compress', '2']
 
@@ -57,13 +51,11 @@ jlink {
 
     jpackage {
         imageName = 'C2P'
-        installerType = 'msi'                   // 'exe' でもOK（必要なら変更）
+        installerType = 'msi'                  
         appVersion = project.version.toString()
 
-        // アイコン（存在するのでプロジェクト内のものを利用）
         icon = file('src/main/resources/icons/app.ico')
 
-        // Windows向けの“行儀のよい”インストーラ設定（すべて -- で始まる正規オプション）
         installerOptions = [
             '--name', 'C2P',
             '--vendor', 'Your Name or Brand',
@@ -73,7 +65,6 @@ jlink {
             '--win-shortcut',
             '--win-dir-chooser',
             '--win-per-user-install',
-            // 更新時の識別子（固定値にしてください。例はダミー）
             '--win-upgrade-uuid', '12345678-90ab-cdef-1234-567890abcdef'
         ]
     }

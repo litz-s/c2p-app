@@ -1,21 +1,21 @@
 package com.example.c2p;
 
+import java.util.List;
+
 import com.example.c2p.dialog.CreateTableDialog;
 import com.example.c2p.dialog.EditTableDialog;
 import com.example.c2p.model.CopyTable;
 import com.example.c2p.store.Store;
+
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Node; // ← これを必ず入れる（javafxのNode）
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent; // ← 追加
-import javafx.scene.layout.*;
+import javafx.scene.layout.FlowPane; 
+import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
-
-import java.util.List;
 
 public class MainController {
 
@@ -77,24 +77,21 @@ public class MainController {
                         "-fx-border-width: 1;" +
                         "-fx-cursor: hand;");
 
-        // 余白も含めて当たり判定
         v.setPickOnBounds(true);
 
         Label name = new Label(table.getName());
         name.setStyle("-fx-font-size: 15; -fx-font-weight: bold;");
         name.setMaxWidth(Double.MAX_VALUE);
-        name.setAlignment(Pos.CENTER); // ★ ラベルの配置も中央
+        name.setAlignment(Pos.CENTER); 
         name.setTextAlignment(TextAlignment.CENTER);
         v.getChildren().add(name);
 
-        // 【重要】まずは素直に setOnMouseClicked で遷移（フィルタは使わない）
         v.setOnMouseClicked(ev -> {
             if (ev.getButton() == MouseButton.PRIMARY) {
                 App.showTable(table.getId());
             }
         });
 
-        // 右クリックで編集
         v.setOnContextMenuRequested(ev -> {
             EditTableDialog dlg = new EditTableDialog(table.getId());
             dlg.showAndWait().ifPresent(updated -> {
