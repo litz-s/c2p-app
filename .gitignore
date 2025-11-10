@@ -1,0 +1,10 @@
+/build/
+/.gradle/
+/out/
+*.iml
+*.log
+*.class
+*.exe
+*.msi
+*.zip
+.DS_Store

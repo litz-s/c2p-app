@@ -1,0 +1,115 @@
+
+plugins {
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
+    id 'org.beryx.jlink' version '2.26.0'
+    id 'org.javamodularity.moduleplugin' version '1.8.12'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    // Main class detected in the uploaded project
+    mainModule = 'com.example.c2p'
+    mainClass = 'com.example.c2p.App'
+}
+
+javafx {
+    // Use a JavaFX matching the JDK (21系)
+    version = '21.0.4'
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.17.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.17.2'
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+test {
+    useJUnitPlatform()
+}
+
+/**
+ * org.beryx.jlink: Create a minimized runtime + Windows installer via jpackage
+ *  - No code signing (無料運用)
+ *  - Fill metadata properly to look like a legit app
+ */
+jlink {
+    options = ['--strip-debug', '--no-header-files', '--no-man-pages', '--compress', '2']
+
+    launcher {
+        name = 'C2P'
+    }
+
+    jpackage {
+        imageName = 'C2P'
+        installerType = 'msi'                   // 'exe' でもOK（必要なら変更）
+        appVersion = project.version.toString()
+
+        // アイコン（存在するのでプロジェクト内のものを利用）
+        icon = file('src/main/resources/icons/app.ico')
+
+        // Windows向けの“行儀のよい”インストーラ設定（すべて -- で始まる正規オプション）
+        installerOptions = [
+            '--name', 'C2P',
+            '--vendor', 'Your Name or Brand',
+            '--description', 'C2P - Clipboard to Pattern (JavaFX)',
+            '--copyright', '(c) 2025 Your Name',
+            '--win-menu',
+            '--win-shortcut',
+            '--win-dir-chooser',
+            '--win-per-user-install',
+            // 更新時の識別子（固定値にしてください。例はダミー）
+            '--win-upgrade-uuid', '12345678-90ab-cdef-1234-567890abcdef'
+        ]
+    }
+}
+
+/**
+ * 可搬版ZIP（インストール不要版）を dist/ に出力
+ */
+tasks.register('portableZip', Zip) {
+    dependsOn tasks.jpackage
+    from("$buildDir/jpackage/C2P") {
+        into('C2P')
+    }
+    destinationDirectory = file("$buildDir/dist")
+    archiveFileName = "C2P-portable-${project.version}.zip"
+}
+
+/**
+ * SHA-256 ハッシュ出力（ユーザー安心用）
+ */
+tasks.register('sha256sum') {
+    dependsOn tasks.jpackage, tasks.portableZip
+    doLast {
+        def dist = file("$buildDir/dist")
+        dist.mkdirs()
+        def out = new File(dist, "SHA256SUMS.txt")
+        out.text = ""
+        [file("$buildDir/jpackage/C2P-${project.version}.msi"),
+         file("$buildDir/dist/C2P-portable-${project.version}.zip")].each { f ->
+            if (f.exists()) {
+                def sha = java.security.MessageDigest.getInstance("SHA-256")
+                f.eachByte(8192) { b, len -> sha.update(b, 0, len) }
+                def hex = sha.digest().collect { String.format('%02x', it) }.join()
+                out << "${hex}  ${f.name}\n"
+            }
+        }
+        println "Wrote ${out}"
+    }
+}

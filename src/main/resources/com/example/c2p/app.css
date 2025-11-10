@@ -1,0 +1,47 @@
+/* ===== ListView: 交互色・選択色オフ（既存） ===== */
+.list-view .list-cell:odd,
+.list-view .list-cell:even {
+    -fx-background-color: -fx-control-inner-background;
+}
+.list-view .list-cell:filled:selected,
+.list-view .list-cell:filled:selected:focused {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-text-fill: -fx-text-inner-color;
+}
+.list-view:focused { -fx-background-insets: 0; }
+.list-view .list-cell:focused { -fx-background-insets: 0; }
+.list-view .list-cell:hover {
+    -fx-background-color: -fx-control-inner-background;
+}
+
+/* ===== List cell の余白・カード感 ===== */
+.list-view .list-cell {
+    -fx-padding: 2 4;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
+.text-area {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 2 6;
+}
+
+/* 削除ボタンの軽いスタイル */
+.button {
+    -fx-background-radius: 10;
+}
+.button:hover {
+    -fx-opacity: 0.92;
+}
+
+/* 検索フィールド */
+.text-field {
+    -fx-background-radius: 10;
+    -fx-padding: 6 10;
+}
+
+/* スクロールバーを控えめに */
+.scroll-bar:vertical .thumb,
+.scroll-bar:horizontal .thumb {
+    -fx-background-radius: 8;
+}

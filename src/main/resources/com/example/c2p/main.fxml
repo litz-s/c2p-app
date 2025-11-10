@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.3" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="com.example.c2p.MainController">
+    <top>
+        <HBox spacing="8" BorderPane.alignment="CENTER_RIGHT" style="-fx-padding: 10;">
+            <Label text="C2P Tables" style="-fx-font-size: 18; -fx-font-weight: bold;" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <!-- ここが必須 -->
+            <Button fx:id="addBtn" text="＋">
+                <tooltip>
+                    <Tooltip text="新しいコピペテーブルを作成" />
+                </tooltip>
+            </Button>
+            <Button fx:id="editBtn" text="編集">
+                <tooltip>
+                    <Tooltip text="既存のテーブルを編集" />
+                </tooltip>
+            </Button>
+        </HBox>
+    </top>
+    <center>
+        <ScrollPane fitToWidth="true">
+            <content>
+                <FlowPane fx:id="cardsPane" hgap="12.0" vgap="12.0">
+                    <padding>
+                        <Insets top="10.0" right="10.0" bottom="10.0" left="10.0" />
+                    </padding>
+                </FlowPane>
+            </content>
+        </ScrollPane>
+    </center>
+</BorderPane>
